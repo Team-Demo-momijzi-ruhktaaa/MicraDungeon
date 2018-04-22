@@ -126,8 +126,9 @@ public:
 				nullptr,
 				//•À‚Ñ‘Ö‚¦‚é‚ÆŽ€‚É‚Ü‚·
 				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(angles.x)) *
-				DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(angles.z)) *
 				DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(angles.y)) *
+				DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(angles.z)) *
+				
 				DirectX::XMMatrixTranslation
 				(
 					position.x,

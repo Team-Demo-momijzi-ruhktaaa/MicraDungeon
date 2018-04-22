@@ -68,30 +68,39 @@ int MAIN()
 	};
 	SetUvData setUvData;
 
-	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::PLANE;
+	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::SOLID;
 
 	Camera camera(cameraMode);
 
 	Texture textureBox(L"texture/TestTexture.jpg");
 	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
 
-	Sprite box;
+	Mesh box;
 	setUvData.SetAll(Float2(0.0f,0.0f));
 	textureBox.texUVData.SetUVNum(setUvData.uvData);
 	box.CreateData(&textureBox, 1);
 
-	Sprite box2;
-	setUvData.SetAround(Float2(2.0f, 1.0f));
+	Mesh box2;
+	setUvData.SetAll(Float2(2.0f, 1.0f));
 	textureBox.texUVData.SetUVNum(setUvData.uvData);
 	box2.CreateData(&textureBox, 1);
 	
-	box.position.y = 5;
+	Mesh box3;
+	setUvData.SetAll(Float2(2.0f, 0.0f));
+	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	box3.CreateData(&textureBox, 1);
 
+
+	box3.position.x = 2.0f;
+	box2.position.y = 5.0f;
+	box3.position.y = 5.0f;
 
 	box.Draw();
 	box2.Draw();
+
 	box.SetOBBData();
 	box2.SetOBBData();
+
 	OBB obb;
 
 	while (App::Refresh())
@@ -179,16 +188,29 @@ int MAIN()
 		//ï°êîÇÃobjÇ∆ê⁄êGîªíËÇ∆ÇÈèÍçáÇÃÉtÉâÉOÇ™ÇæÇÈéÄÇ 
 		if(!obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
 		{
-			box.position.y -= 0.01f;
+			box2.position.y -= 0.01f;
+			box3.position.y -= 0.01f;
 
-			box2.angles.y += 0.01f;
+			box2.angles.x += 0.01f;
 			box2.angles.z += 0.01f;
 
 			box.SetOBBData();
 			box2.SetOBBData();
+			if (obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
+			{
+				box2.position.y += 0.01f;
+				box3.position.y += 0.01f;
+
+				box2.angles.x -= 0.01f;
+				box2.angles.z -= 0.01f;
+
+				box.SetOBBData();
+				box2.SetOBBData();
+			}
 		}
 		box.Draw();
 		box2.Draw();
+		box3.Draw();
 	}
 	return 0;
 }

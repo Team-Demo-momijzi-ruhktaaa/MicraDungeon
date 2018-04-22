@@ -61,9 +61,9 @@ public:
 	}
 
 	//衝突判定取得
-	bool OBBCheck(Sprite::OBBData obb1, Sprite::OBBData obb2)
+	bool OBBCheck(Mesh::OBBData obb1, Mesh::OBBData obb2)
 	{
-		Sprite::OBBData obb[2];
+		Mesh::OBBData obb[2];
 		obb[0] = obb1;
 		obb[1] = obb2;
 		Float3 L = obb[0].OBBpos - obb[1].OBBpos;
@@ -154,13 +154,10 @@ public:
 				}
 			}
 		}
-
 		return true;
 	}
 
-
-
-	bool ColOBBs(Sprite::OBBData &obb1, Sprite::OBBData &obb2)
+	bool ColOBBs(Mesh::OBBData &obb1, Mesh::OBBData &obb2)
 	{
 		// 各方向ベクトルの確保
 		// （N***:標準化方向ベクトル）
@@ -290,9 +287,6 @@ public:
 		// 分離平面が存在しないので「衝突している」
 		return true;
 	}
-
-
-
 
 	// 分離軸に投影された軸成分から投影線分長を算出
 	FLOAT LenSegOnSeparateAxis(Float3 *Sep, Float3 *e1, Float3 *e2, Float3 *e3 = 0)

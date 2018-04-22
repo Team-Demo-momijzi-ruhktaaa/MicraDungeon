@@ -6,6 +6,25 @@ public:
 	Float3 scale;		//大きさ
 	Float3 axis;		//物体の軸の座標
 
+	//ボックスの向いている面の初期値
+	Float4 BaseDir[3]
+	{
+		Float4(0,0,1,1),
+		Float4(1,0,0,1),
+		Float4(0,1,0,1)
+	};
+
+	//有向境界ボックスで使用するデータ
+	struct OBBData
+	{
+		//ボックスの中心座標
+		Float3 OBBpos;
+		//ボックスの方向ベクトル
+		Float3 OBBvector[3];
+		//ボックスの軸方向の長さ
+		float OBBlength[3];
+	};
+
 	std::vector<Vertex> vertices;
 	std::vector<UINT> indices;
 
@@ -29,10 +48,29 @@ public:
 	{
 
 	}
-	//ワールドのMatrixをベクトルとして取得
-	DirectX::XMVECTOR GetWorld(int num)
+
+	void CreateData(Texture* tex, int mode)
 	{
-		return constant.world.r[num]; 
+		material.SetTexture(0, tex);
+
+		Float2 texSize(tex->GetSize().x, tex->GetSize().y);
+
+		switch (mode)
+		{
+			case 0://UI		座標を追加しろー
+				CreatePlane(texSize / 2.0f);
+				break;
+			case 1://四角形	上に同じ
+				CreateCube(tex->GetTexUVData());
+				break;
+		}
+		Apply();
+	}
+
+	//ワールドのMatrixをベクトルとして取得
+	DirectX::XMMATRIX GetWorld()
+	{
+		return constant.world; 
 	}
 	//トライアングルリスト作成
 	void CreateTriangle()
@@ -88,7 +126,6 @@ public:
 
 	void CreateCube(
 		Texture::TexUVData texUVData,
-		Float3 axis = Float3(0.0f,0.0f,0.0f),
 		bool souldClear = true
 	)
 	{
@@ -250,7 +287,56 @@ public:
 		}
 	}
 	
+	void SetOBBData()
+	{
+		//mat1 2は回転行列
+		DirectX::XMMATRIX mat1, mat2, mat3;
+		mat1 = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(angles.x));
+		mat2 = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(angles.y));
+		mat3 = DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(angles.z));
+		Float4 v4[3];//基本の向きのベクトルに行列1,2の回転を適用した状態
+					 //を計算して代入
+					 //vector4なのは行列の型が4x4なのでそれに合わせた
+		Float3 v3[3];
+
+		for (int i = 0; i < 3; i++)
+		{
+			v4[i] = XMVector4Transform(BaseDir[i], mat1);
+			v4[i] = XMVector4Transform(v4[i], mat2);
+			v4[i] = XMVector4Transform(v4[i], mat3);
+			v4[i] = XMVector4Transform(v4[i], GetWorld());
+
+			//vec4からvec3にデータを移す
+			v3[i] = Float3(v4[i].x, v4[i].y, v4[i].z);
+		}
+
+		//OBBの中心座標設定
+		obbData.OBBpos = position;
+
+		//OBBの辺の長さを設定
+		obbData.OBBlength[0] = scale.x;
+		obbData.OBBlength[1] = scale.y;
+		obbData.OBBlength[2] = scale.z;
+
+		obbData.OBBvector[0] = Float3(DirectX::XMVector3Normalize(v3[0]));
+		obbData.OBBvector[1] = Float3(DirectX::XMVector3Normalize(v3[1]));
+		obbData.OBBvector[2] = Float3(DirectX::XMVector3Normalize(v3[2]));
+	}
+	//------------------------------------------久保田_04_10
+
+	void UpdateOBBData()
+	{
+		SetOBBData();
+	}
+
+	OBBData GetOBBData()
+	{
+		return obbData;
+	}
+
 private:
+	OBBData obbData;
+
 	struct Constant
 	{
 		DirectX::XMMATRIX world;
