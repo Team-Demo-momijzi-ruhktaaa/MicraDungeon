@@ -53,10 +53,6 @@ public:
 		}
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	
-		swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
-			reinterpret_cast<void**>(&renderTexture));
-
-		device->CreateRenderTargetView(renderTexture, nullptr, &renderTargetView);
 		
 		//バッファーリソースのデータの設定
 		D3D11_BUFFER_DESC constantBufferDesc = {};
@@ -66,6 +62,8 @@ public:
 		device->CreateBuffer(&constantBufferDesc, nullptr, &constantBuffer);
 
 		App::AddProcedure(this);
+
+		CreateRenderTarget();
 
 		D3D11_TEXTURE2D_DESC depthStencilTextureDesc = {};
 		depthStencilTextureDesc.Width = App::GetWindowSize().x;
@@ -89,16 +87,6 @@ public:
 		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;//深度ステンシルビューで使用されるリソースにアクセスする方法を指定する
 
 		device->CreateDepthStencilView(depthStencilTexture,	&depthStencilViewDesc,&depthStencilView	);
-
-		D3D11_VIEWPORT viewPort = {};
-		viewPort.TopLeftX = 0.0f;//ビューポートの左側のX値
-		viewPort.TopLeftY = 0.0f;//ビューポートの上部のY位置
-		viewPort.Width = static_cast<float>(App::GetWindowSize().x);//ビューポートの幅
-		viewPort.Height = static_cast<float>(App::GetWindowSize().y);//ビューポートの高さ
-
-		viewPort.MinDepth = 0.0f;//ビューポートの最小深度,0 ～ 1の範囲
-		viewPort.MaxDepth = 1.0f;//				 最大深度
-		context->RSSetViewports(1, &viewPort);
 	}
 
 	~Graphics()
@@ -160,6 +148,24 @@ private:
 	ATL::CComPtr<ID3D11Texture2D> depthStencilTexture = nullptr;
 
 	
+	void CreateRenderTarget()
+	{
+		D3D11_VIEWPORT viewPort = {};
+		viewPort.TopLeftX = 0.0f;//ビューポートの左側のX値
+		viewPort.TopLeftY = 0.0f;//ビューポートの上部のY位置
+		viewPort.Width = static_cast<float>(App::GetWindowSize().x);//ビューポートの幅
+		viewPort.Height = static_cast<float>(App::GetWindowSize().y);//ビューポートの高さ
+
+		swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+			reinterpret_cast<void**>(&renderTexture));
+
+		device->CreateRenderTargetView(renderTexture, nullptr, &renderTargetView);
+
+		viewPort.MinDepth = 0.0f;//ビューポートの最小深度,0 ～ 1の範囲
+		viewPort.MaxDepth = 1.0f;//				 最大深度
+		context->RSSetViewports(1, &viewPort);
+	}
+
 	void OnProceed(HWND, UINT message, WPARAM, LPARAM) override
 	{
 		if (message != WM_SIZE)
@@ -180,5 +186,7 @@ private:
 		renderTexture.Release();
 		context->Flush();
 		swapChain->ResizeBuffers(swapChainDesc.BufferCount, App::GetWindowSize().x, App::GetWindowSize().y, swapChainDesc.BufferDesc.Format, 0);
+	
+		CreateRenderTarget();
 	}
 };

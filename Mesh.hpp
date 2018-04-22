@@ -33,7 +33,7 @@ public:
 	Mesh()
 	{
 		App::Initialize();
-		
+
 		position = Float3(0.0f, 0.0f, 0.0f);
 		angles = Float3(0.0f, 0.0f, 0.0f);
 		scale = Float3(1.0f, 1.0f, 1.0f);
@@ -70,7 +70,7 @@ public:
 	//ワールドのMatrixをベクトルとして取得
 	DirectX::XMMATRIX GetWorld()
 	{
-		return constant.world; 
+		return constant.world;
 	}
 	//トライアングルリスト作成
 	void CreateTriangle()
@@ -80,9 +80,9 @@ public:
 		//ベクタに要素を追加
 		//ここをいじれば描画する物を変えることが可能だろう
 		//できれば引数を使って動的に作りたい
-		vertices.push_back(Vertex(Float3(0.0f, 1.0f, 0.0f), Float3(1.0f, 0.0f, 0.0f),Float2(0.0f,0.0f)));
-		vertices.push_back(Vertex(Float3(1.0f, -1.0f, 0.0f), Float3(0.0f, 1.0f, 0.0f),Float2(1.0f,0.0f)));
-		vertices.push_back(Vertex(Float3(-1.0f, -1.0f, 0.0f), Float3(0.0f, 0.0f, 1.0f),Float2(0.0f,1.0f)));
+		vertices.push_back(Vertex(Float3(0.0f, 1.0f, 0.0f), Float3(1.0f, 0.0f, 0.0f), Float2(0.0f, 0.0f)));
+		vertices.push_back(Vertex(Float3(1.0f, -1.0f, 0.0f), Float3(0.0f, 1.0f, 0.0f), Float2(1.0f, 0.0f)));
+		vertices.push_back(Vertex(Float3(-1.0f, -1.0f, 0.0f), Float3(0.0f, 0.0f, 1.0f), Float2(0.0f, 1.0f)));
 	}
 
 	//四角のボックス作成用関数
@@ -95,7 +95,7 @@ public:
 		Float3 upDirection = Float3(0.0f, 1.0f, 0.0f),		//yの座標
 		Float3 offset = Float3(0.0f, 0.0f, 0.0f),			//zの座標
 		Float3 forwardDirection = Float3(0.0f, 0.0f, 1.0f)	//normal関係　よくわかめ
-		)
+	)
 	{
 		if (souldclear)
 		{
@@ -109,9 +109,9 @@ public:
 		vertices.push_back(Vertex(leftDirection * -size.x + upDirection *  size.y + offset,//左上
 			-forwardDirection, Float2(numUV * (1 / uv))));
 		vertices.push_back(Vertex(leftDirection *  size.x + upDirection *  size.y + offset,//右上
-			-forwardDirection, Float2((numUV.x + 1) * (1 / uv.x),numUV.y *(1 / uv.y))));
+			-forwardDirection, Float2((numUV.x + 1) * (1 / uv.x), numUV.y *(1 / uv.y))));
 		vertices.push_back(Vertex(leftDirection * -size.x + upDirection * -size.y + offset,//左下
-			-forwardDirection, Float2(numUV.x * ( 1 / uv.x), (numUV.y+ 1) *(1 / uv.y))));
+			-forwardDirection, Float2(numUV.x * (1 / uv.x), (numUV.y + 1) *(1 / uv.y))));
 		vertices.push_back(Vertex(leftDirection *  size.x + upDirection * -size.y + offset,//右下
 			-forwardDirection, Float2((numUV + 1) * (1 / uv))));
 
@@ -125,7 +125,7 @@ public:
 	}
 
 	void CreateCube(
-		Texture::TexUVData texUVData,
+		Texture::TexUVData tex,
 		bool souldClear = true
 	)
 	{
@@ -135,12 +135,12 @@ public:
 			indices.clear();
 		}
 
-		CreatePlane(Float2(0.5f, 0.5f), texUVData.uv, texUVData.numUV[0], false,Float3( 1.0f, 0.0f, 0.0f), Float3( 0.0f, 1.0f, 0.0f), Float3( 0.0f, 0.0f,-0.5f), Float3( 0.0f, 0.0f, 1.0f));//前
-		CreatePlane(Float2(0.5f, 0.5f), texUVData.uv, texUVData.numUV[1], false,Float3(-1.0f, 0.0f, 0.0f), Float3( 0.0f, 1.0f, 0.0f), Float3( 0.0f, 0.0f, 0.5f), Float3( 0.0f, 0.0f,-1.0f));//後
-		CreatePlane(Float2(0.5f, 0.5f), texUVData.uv, texUVData.numUV[2], false,Float3( 0.0f, 0.0f, 1.0f), Float3( 0.0f, 1.0f, 0.0f), Float3( 0.5f, 0.0f, 0.0f), Float3(-1.0f, 0.0f, 0.0f));//左
-		CreatePlane(Float2(0.5f, 0.5f), texUVData.uv, texUVData.numUV[3], false,Float3( 0.0f, 0.0f,-1.0f), Float3( 0.0f, 1.0f, 0.0f), Float3(-0.5f, 0.0f, 0.0f), Float3( 1.0f, 0.0f, 0.0f));//右
-		CreatePlane(Float2(0.5f, 0.5f), texUVData.uv, texUVData.numUV[4], false,Float3( 1.0f, 0.0f, 0.0f), Float3( 0.0f, 0.0f, 1.0f), Float3( 0.0f, 0.5f, 0.0f), Float3( 0.0f,-1.0f, 0.0f));//上
-		CreatePlane(Float2(0.5f, 0.5f), texUVData.uv, texUVData.numUV[5], false,Float3( 1.0f, 0.0f, 0.0f), Float3( 0.0f, 0.0f,-1.0f), Float3( 0.0f,-0.5f, 0.0f), Float3( 0.0f, 1.0f, 0.0f));//下
+		CreatePlane(Float2(0.5f, 0.5f), tex.uv, tex.numUV[0], false,Float3( 1.0f, 0.0f, 0.0f), Float3( 0.0f, 1.0f, 0.0f), Float3( 0.0f, 0.0f,-0.5f), Float3( 0.0f, 0.0f, 1.0f));//前
+		CreatePlane(Float2(0.5f, 0.5f), tex.uv, tex.numUV[1], false,Float3(-1.0f, 0.0f, 0.0f), Float3( 0.0f, 1.0f, 0.0f), Float3( 0.0f, 0.0f, 0.5f), Float3( 0.0f, 0.0f,-1.0f));//後
+		CreatePlane(Float2(0.5f, 0.5f), tex.uv, tex.numUV[2], false,Float3( 0.0f, 0.0f, 1.0f), Float3( 0.0f, 1.0f, 0.0f), Float3( 0.5f, 0.0f, 0.0f), Float3(-1.0f, 0.0f, 0.0f));//左
+		CreatePlane(Float2(0.5f, 0.5f), tex.uv, tex.numUV[3], false,Float3( 0.0f, 0.0f,-1.0f), Float3( 0.0f, 1.0f, 0.0f), Float3(-0.5f, 0.0f, 0.0f), Float3( 1.0f, 0.0f, 0.0f));//右
+		CreatePlane(Float2(0.5f, 0.5f), tex.uv, tex.numUV[4], false,Float3( 1.0f, 0.0f, 0.0f), Float3( 0.0f, 0.0f, 1.0f), Float3( 0.0f, 0.5f, 0.0f), Float3( 0.0f,-1.0f, 0.0f));//上
+		CreatePlane(Float2(0.5f, 0.5f), tex.uv, tex.numUV[5], false,Float3( 1.0f, 0.0f, 0.0f), Float3( 0.0f, 0.0f,-1.0f), Float3( 0.0f,-0.5f, 0.0f), Float3( 0.0f, 1.0f, 0.0f));//下
 	}
 	//四角形の作られ方↓（トライアングルボックス理解用）
 	/*
@@ -264,11 +264,11 @@ public:
 		constant.world = DirectX::XMMatrixTranspose
 		(
 			DirectX::XMMatrixTranslation(axis.x, axis.y, axis.z) *
-			DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
-			DirectX::XMMatrixRotationY(angles.y) *
-			DirectX::XMMatrixRotationX(angles.x) *
-			DirectX::XMMatrixRotationZ(angles.z) *
-			DirectX::XMMatrixTranslation(position.x, position.y, position.z )
+			DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(angles.y)) *
+			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(angles.x)) *
+			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(angles.z)) *
+			DirectX::XMMatrixTranslation(position.x, position.y, position.z ) *
+			DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) 
 		);
 		App::GetGraphicsContext().RSSetState(rasterizerState);
 

@@ -95,7 +95,7 @@ public:
 		{
 			//フルスクリーンから戻したいときこっちに入るのかと思われ
 			SetWindowLongPtrW(handle, GWL_STYLE, WS_VISIBLE | WS_OVERLAPPEDWINDOW);
-			SetWindowPos(handle, HWND_TOP, 0, 0,0,0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
+			SetWindowPos(handle, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
 			SetSize(size.x, size.y);
 		}
 	}

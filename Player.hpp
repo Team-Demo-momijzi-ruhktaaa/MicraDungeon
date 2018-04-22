@@ -1,54 +1,44 @@
 class Player
 {
 public:
-	Mesh head;//ì™
-	Mesh body;//ëÃ
-	Mesh leftArm;//ç∂òr
-	Mesh rightArm;//âEòr
-	Mesh leftLeg;//ç∂ãr
-	Mesh rightLeg;//âEãr
-
 	Player(){}
 
-	Player(Texture texHead,Texture texBody,Texture texArm,Texture texLeg)
+	Player(Texture* texArm)
 	{
+		leftArmBase.CreateData(texArm, 1);
+		rightArmBase.CreateData(texArm, 1);
+		leftArmBase.scale = 0.5f;
+		leftArmBase.axis.x = -1.0f;
+		leftArmBase.position.y = -1.0f;
 
+		rightArmBase.scale = 0.5f;
+		rightArmBase.axis.x = 1.0f;
+		rightArmBase.position.y = -1.0f;
 	}
 	~Player()
 	{
-
-	}
-	void Release()
-	{
-
-	}
-
-	void SetPlayerUv()
-	{
-
 	}
 	
 	void PlayerMove(Float3 position)
 	{
-		head.position += position;
-		body.position += position;
-		leftArm.position += position;
-		rightArm.position += position;
-		leftLeg.position += position;
-		rightLeg.position += position;
+		leftArmBase.position += position;
+		rightArmBase.position += position;
 	}
 
-
-	void Update()
+	void PlayerRatate(Float3 angles)
 	{
-		head.Draw();
-		body.Draw();
-		leftArm.Draw();
-		rightArm.Draw();
-		leftLeg.Draw();
-		rightLeg.Draw();
+		leftArmBase.angles += angles;
+		rightArmBase.angles += angles;
+	}
+
+	void Draw()
+	{
+		leftArmBase.Draw();
+		rightArmBase.Draw();
 	}
 
 private:
-	
+	Mesh leftArmBase;//ç∂òrÇÃäÓì_Ç…Ç»ÇÈç¿ïW
+	Mesh rightArmBase;//âEòr
+
 };

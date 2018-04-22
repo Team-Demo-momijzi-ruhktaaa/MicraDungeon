@@ -1,7 +1,7 @@
 class Camera : public App::Window::Proceedable
 {
 public:
-	enum CameraMoveMode { PLANE, SOLID };
+	enum CameraMoveMode { PLANE, SOLID};
 	Float3 position;//カメラの座標
 	Float3 angles;	//カメラの現在の見ている角度
 	//カメラを向いている方向に移動させる時に使用する変数
@@ -12,7 +12,7 @@ public:
 	{
 		App::Initialize();
 
-		position = Float3(0.0f, 0.0f, -5.0f);
+		position = Float3(0.0f, 0.0f, 0.0f);
 		angles = Float3(0.0f, 0.0f, 0.0f);
 		advance = Float3(0.0f, 0.0f, 0.0f);
 		side = Float3(0.0f, 0.0f, 0.0f);
@@ -28,7 +28,7 @@ public:
 	{
 		App::Initialize();
 
-		position = Float3(0.0f, 0.0f, -5.0f);
+		position = Float3(0.0f, 0.0f, 0.0f);
 		angles = Float3(0.0f, 0.0f, 0.0f);
 		advance = Float3(0.0f, 0.0f, 0.0f);
 		side = Float3(0.0f, 0.0f, 0.0f);
@@ -48,7 +48,7 @@ public:
 
 	void ResetCameraPos()
 	{
-		position = Float3(0.0f, 0.0f, -5.0f);
+		position = Float3(0.0f, 0.0f, 0.0f);
 		angles = Float3(0.0f, 0.0f, 0.0f);
 		advance = Float3(0.0f, 0.0f, 0.0f);
 		side = Float3(0.0f, 0.0f, 0.0f);
@@ -72,7 +72,7 @@ public:
 			)
 		);
 	}
-
+	//現在の向いている方向を設定　最初にこれを呼ばないと移動不可能
 	void SetCameraDirection()
 	{
 		switch (mode)

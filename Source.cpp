@@ -11,9 +11,7 @@ int MAIN()
 	*/	
 	float num = 0.0f;
 
-	bool flagPunch = false;
-	bool flagReturn = false;
-	bool flagA = false;
+	bool playFlag = true;
 
 	//textureのuvを設定するためのもの
 	struct SetUvData
@@ -68,46 +66,34 @@ int MAIN()
 	};
 	SetUvData setUvData;
 
-	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::SOLID;
-
+	//マウスの初期座標の設定
+	App::SetMousePosition(App::GetWindowSize().x / 2, App::GetWindowSize().y / 2);
+	//カメラの動かし方の指定　PLANEで平面的　SOLIDで立体的
+	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::PLANE;
+	//カメラの作成
 	Camera camera(cameraMode);
+	camera.SetCameraDirection();
 
+	//テクスチャの作成-----------------------------------------------------
 	Texture textureBox(L"texture/TestTexture.jpg");
 	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
 
-	Mesh box;
-	setUvData.SetAll(Float2(0.0f,0.0f));
-	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	box.CreateData(&textureBox, 1);
+	Texture texPlayerArm(L"texture/playerArm.jpg");
+	texPlayerArm.texUVData.SetUVNum(setUvData.uvData);
 
-	Mesh box2;
-	setUvData.SetAll(Float2(2.0f, 1.0f));
-	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	box2.CreateData(&textureBox, 1);
-	
-	Mesh box3;
-	setUvData.SetAll(Float2(2.0f, 0.0f));
-	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	box3.CreateData(&textureBox, 1);
-
-
-	box3.position.x = 2.0f;
-	box2.position.y = 5.0f;
-	box3.position.y = 5.0f;
-
-	box.Draw();
-	box2.Draw();
-
-	box.SetOBBData();
-	box2.SetOBBData();
-
+	//------------------------------------------------------------------------
+	//プレイヤーキャラの作成
+	Player player(&texPlayerArm);
+	//オリエンテッドバウンディングボックスの判定用のデータ作成
 	OBB obb;
 
+	
 	while (App::Refresh())
 	{
 		//カメラの操作関連
 		{
-			if (App::GetKey('W') || App::GetKey('A') || App::GetKey('S') || App::GetKey('D'))
+			//カメラの視点をWASDで動かす
+			/*if (App::GetKey('W') || App::GetKey('A') || App::GetKey('S') || App::GetKey('D'))
 			{
 				if (App::GetKey('D'))
 				{
@@ -126,24 +112,34 @@ int MAIN()
 					camera.angles.x += 1.0f;
 				}
 				camera.SetCameraDirection();
+			}*/
+			if (App::GetMousePosition().x < App::GetWindowSize().x / 4)
+			{
+				camera.angles.y -= 0.5f;
+				camera.SetCameraDirection();
+			}
+			else if (App::GetMousePosition().x > App::GetWindowSize().x / 4 * 3 )
+			{
+				camera.angles.y += 0.5f;
+				camera.SetCameraDirection();
+			}
+			//カメラの座標をWASDで動かす（後でカメラhppに関数化したい）
+			if (App::GetKey('W'))//前に移動
+			{
+				camera.CameraMoveAdvance(0.05f);
+			}
+			else if (App::GetKey('S'))//後ろに移動
+			{
+				camera.CameraMoveAdvance(-0.05f);
 			}
 
-			if (App::GetKey(VK_UP))
+			if (App::GetKey('D'))//右に移動
 			{
-				camera.CameraMoveAdvance(0.1f);
+				camera.CameraMoveSide(0.05f);
 			}
-			else if (App::GetKey(VK_DOWN))
+			else if (App::GetKey('A'))//左に移動
 			{
-				camera.CameraMoveAdvance(-0.1f);
-			}
-
-			if (App::GetKey(VK_RIGHT))
-			{
-				camera.CameraMoveSide(0.1f);
-			}
-			else if (App::GetKey(VK_LEFT))
-			{
-				camera.CameraMoveSide(-0.1f);
+				camera.CameraMoveSide(-0.05f);
 			}
 			camera.Update();
 		}
@@ -186,31 +182,9 @@ int MAIN()
 		
 		//欠点　一回しか無理　任意にフラグを切り替える必要あり
 		//複数のobjと接触判定とる場合のフラグがだる死ぬ
-		if(!obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
-		{
-			box2.position.y -= 0.01f;
-			box3.position.y -= 0.01f;
+		
+		player.Draw();
 
-			box2.angles.x += 0.01f;
-			box2.angles.z += 0.01f;
-
-			box.SetOBBData();
-			box2.SetOBBData();
-			if (obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
-			{
-				box2.position.y += 0.01f;
-				box3.position.y += 0.01f;
-
-				box2.angles.x -= 0.01f;
-				box2.angles.z -= 0.01f;
-
-				box.SetOBBData();
-				box2.SetOBBData();
-			}
-		}
-		box.Draw();
-		box2.Draw();
-		box3.Draw();
 	}
 	return 0;
 }
