@@ -55,12 +55,6 @@
     <ClInclude Include="OBB.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Trick.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Map.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>

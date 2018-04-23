@@ -2,16 +2,27 @@ class Map
 {
 public:
 
+
+	int TestMap[10][10] =
+	{
+		{ 2,2,2,2,2,2,0,0,0,0 },
+		{ 2,2,0,0,2,2,0,0,0,0 },
+		{ 2,2,0,0,2,2,0,0,0,0 },
+		{ 2,0,0,0,0,2,0,0,0,0 },
+		{ 2,0,0,0,0,2,0,0,0,0 },
+		{ 2,0,0,0,0,2,0,0,0,0 },
+		{ 2,2,2,2,2,2,0,0,0,0 },
+		{ 0,0,0,0,0,0,0,0,0,0 },
+		{ 0,0,0,0,0,0,0,0,0,0 },
+		{ 0,0,0,0,0,0,0,0,0,0 },
+	};
+
 	Map()
 	{
-		mapWidth = 0;
-		mapHeight = 0;
 		App::Initialize();
 	}
 	Map(const wchar_t* const filepath)
 	{
-		mapWidth = 0;
-		mapHeight = 0;
 		App::Initialize();
 		CreateMap(filepath);
 	}
@@ -26,14 +37,12 @@ public:
 		std::ifstream mapText;
 		mapText.open("mapText/mapLayer.txt");
 
-		mapText >> mapWidth;
-		mapText >> mapHeight;
-
-		mapText >> mapNum;
 	}
 
 private:
-	int startPosx, startPosy, startDirection,
-						mapNum,mapWidth, mapHeight;
+	
+
+
+	
 
 };

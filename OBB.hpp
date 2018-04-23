@@ -52,7 +52,7 @@ public:
 	//“àÏŒvZ
 	float Float3Dot(Float3 f1, Float3 f2)
 	{
-		return f1.x*f2.x + f1.y * f2.y + f1.z*f2.z;
+		return fabs(f1.x*f2.x) + fabs(f1.y * f2.y) + fabs(f1.z*f2.z);
 	}
 
 	float Float3Length(Float3 f1)

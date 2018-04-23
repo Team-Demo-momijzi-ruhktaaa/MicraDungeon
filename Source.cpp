@@ -17,8 +17,11 @@ int MAIN()
 	struct SetUvData
 	{
 		Float2 uvData[6] = {};
+
+
+
 		//前面同じuvに設定
-		void SetAll(Float2 numUV)
+		void SetAllSame(Float2 numUV)
 		{
 			for (int i = 0; i < 6; i++)
 			{
@@ -72,6 +75,7 @@ int MAIN()
 	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::PLANE;
 	//カメラの作成
 	Camera camera(cameraMode);
+	camera.position = Float3(5.5f, 0.0f, -9.0f);
 	camera.SetCameraDirection();
 
 	//テクスチャの作成-----------------------------------------------------
@@ -79,11 +83,19 @@ int MAIN()
 	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
 
 	Texture texPlayerArm(L"texture/playerArm.jpg");
+	texPlayerArm.texUVData.SetDivide(Float2(4.0f, 1.0f));
 	texPlayerArm.texUVData.SetUVNum(setUvData.uvData);
 
 	//------------------------------------------------------------------------
-	//プレイヤーキャラの作成
-	Player player(&texPlayerArm);
+	Mesh fixedBlock;
+	setUvData.SetAllSame(Float2(0.0f, 1.0f));
+	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	fixedBlock.CreateData(&textureBox, 1);
+
+	Map map;
+
+	
+
 	//オリエンテッドバウンディングボックスの判定用のデータ作成
 	OBB obb;
 
@@ -183,8 +195,18 @@ int MAIN()
 		//欠点　一回しか無理　任意にフラグを切り替える必要あり
 		//複数のobjと接触判定とる場合のフラグがだる死ぬ
 		
-		player.Draw();
-
+		for (int z = 0; z < 10; z++)
+		{
+			for (int x = 0; x < 10; x++)
+			{
+				if (map.TestMap[z][x] != 0)
+				{
+					fixedBlock.scale = Float3(1.0f, (float)map.TestMap[z][x], 1.0f);
+					fixedBlock.position = Float3((float)x,0.0f, (float)z);
+					fixedBlock.Draw();
+				}
+			}
+		}
 	}
 	return 0;
 }
