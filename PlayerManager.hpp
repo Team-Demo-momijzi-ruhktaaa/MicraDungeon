@@ -64,6 +64,23 @@ public:
 					player.angles.y += speed;
 					camera.angles.y += speed;
 				}
+				//ボックスに２つの回転を入れるとおかしいのでカメラだけ変更して縦の角度変更
+				//調整必須
+				if (App::GetKey(VK_UP))
+				{
+					if (camera.angles.x - speed >= -90.0f)
+						camera.angles.x -= speed;
+					else
+						camera.angles.x = -90.0f;
+
+				}
+				else if (App::GetKey(VK_DOWN))
+				{
+					if (camera.angles.x + speed <= 0.0f)
+						camera.angles.x += speed;
+					else
+						camera.angles.x = 0.0f;
+				}
 				break;
 			case PlayerManager::MOUSEPLANE:
 				if (App::GetMousePosition().x < App::GetWindowSize().x / 4)
@@ -139,21 +156,21 @@ public:
 		}
 	}
 
-	//現在の向いている方向を設定　camera
+	//現在の向いている方向を設定　camera 現在　x軸の角度変更をカメラのみに追加
 	void SetCameraDirection()
 	{
 		switch (mode)
 		{
 			case PLANE:
 				advance = Float3(
-					cos(DirectX::XMConvertToRadians(-player.angles.y)),
-					0.0f,
-					sin(DirectX::XMConvertToRadians(-player.angles.y))
+					cos(DirectX::XMConvertToRadians(-player.angles.y)) * sin(DirectX::XMConvertToRadians(-camera.angles.x)),
+					sin(DirectX::XMConvertToRadians(-camera.angles.x)),
+					sin(DirectX::XMConvertToRadians(-player.angles.y)) * cos(DirectX::XMConvertToRadians(-camera.angles.x))
 				);
 
 				side = Float3(//90意味わからん
 					cos(DirectX::XMConvertToRadians(-player.angles.y - 90)),
-					0.0f,
+					sin(DirectX::XMConvertToRadians(-camera.angles.x)),
 					sin(DirectX::XMConvertToRadians(-player.angles.y - 90))
 				);
 				break;

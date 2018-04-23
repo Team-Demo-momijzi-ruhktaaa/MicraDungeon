@@ -70,5 +70,8 @@
     <ClInclude Include="PlayerManager.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="ScaffoldBlock.hpp">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

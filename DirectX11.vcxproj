@@ -142,6 +142,7 @@
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="OBB.hpp" />
     <ClInclude Include="PlayerManager.hpp" />
+    <ClInclude Include="ScaffoldBlock.hpp" />
     <ClInclude Include="SoundBuffer.hpp" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Utility.hpp" />

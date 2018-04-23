@@ -1,0 +1,9 @@
+class ScaffoldBlock
+{
+public:
+
+
+private:
+
+
+};
