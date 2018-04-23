@@ -1,41 +1,19 @@
 class Camera : public App::Window::Proceedable
 {
 public:
-	enum CameraMoveMode { PLANE, SOLID};
 	Float3 position;//カメラの座標
 	Float3 angles;	//カメラの現在の見ている角度
-	//カメラを向いている方向に移動させる時に使用する変数
-	Float3 advance;	//前後
-	Float3 side;	//左右
+	
 
 	Camera()
 	{
 		App::Initialize();
 
-		position = Float3(0.0f, 0.0f, 0.0f);
+		position = Float3(0.0f, 0.0f, -0.5f);
 		angles = Float3(0.0f, 0.0f, 0.0f);
-		advance = Float3(0.0f, 0.0f, 0.0f);
-		side = Float3(0.0f, 0.0f, 0.0f);
-		mode = PLANE;
-
-		SetPerspective(60.0f, 0.1f, 1000.0f);
-
-		App::AddProcedure(this);
-
-		Create();
-	}
-	Camera(CameraMoveMode mode)
-	{
-		App::Initialize();
-
-		position = Float3(0.0f, 0.0f, 0.0f);
-		angles = Float3(0.0f, 0.0f, 0.0f);
-		advance = Float3(0.0f, 0.0f, 0.0f);
-		side = Float3(0.0f, 0.0f, 0.0f);
-		this->mode = mode;
-
-		SetPerspective(60.0f, 0.1f, 1000.0f);
 		
+		SetPerspective(60.0f, 0.1f, 1000.0f);
+
 		App::AddProcedure(this);
 
 		Create();
@@ -50,8 +28,6 @@ public:
 	{
 		position = Float3(0.0f, 0.0f, 0.0f);
 		angles = Float3(0.0f, 0.0f, 0.0f);
-		advance = Float3(0.0f, 0.0f, 0.0f);
-		side = Float3(0.0f, 0.0f, 0.0f);
 	}
 
 	//カメラの設定
@@ -72,50 +48,7 @@ public:
 			)
 		);
 	}
-	//現在の向いている方向を設定　最初にこれを呼ばないと移動不可能
-	void SetCameraDirection()
-	{
-		switch (mode)
-		{
-			case PLANE:
-				advance = Float3(//+90については初期のY軸のdirectionが右を向いているため正面に戻す
-					cos(DirectX::XMConvertToRadians(-angles.y + 90)),
-					0.0f,
-					sin(DirectX::XMConvertToRadians(-angles.y + 90))
-				);
-				
-				side = Float3(
-					cos(DirectX::XMConvertToRadians(-angles.y)),
-					0.0f,
-					sin(DirectX::XMConvertToRadians(-angles.y))
-				);
-				break;
-			case SOLID:
-				advance = Float3(//+90については初期のY軸のdirectionが右を向いているため正面に戻す
-					cos(DirectX::XMConvertToRadians(-angles.y + 90)) * cos(DirectX::XMConvertToRadians(-angles.x)),
-					sin(DirectX::XMConvertToRadians(-angles.x)),
-					sin(DirectX::XMConvertToRadians(-angles.y + 90)) * cos(DirectX::XMConvertToRadians(-angles.x))
-				);
-
-				side = Float3(
-					cos(DirectX::XMConvertToRadians(-angles.y)),
-					0.0f,
-					sin(DirectX::XMConvertToRadians(-angles.y))
-				);
-				break;
-			default:
-				break;
-		}
-	}
-
-	void CameraMoveAdvance(float speed)
-	{
-		position = position + advance * speed;
-	}
-	void CameraMoveSide(float speed)
-	{
-		position = position + side * speed;
-	}
+	
 
 	void Update()
 	{
@@ -167,9 +100,6 @@ private:
 		DirectX::XMMATRIX view;
 		DirectX::XMMATRIX projection;
 	};
-
-	//平面的挙動（x,z）か立体的挙動か(x,y,z)か
-	CameraMoveMode mode;
 
 	float fieldOfView;//視野
 	float nearClip;//クリッピング面の近面

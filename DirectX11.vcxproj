@@ -134,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="App.hpp" />
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="CameraManager.hpp" />
     <ClInclude Include="DirectSound.hpp" />
     <ClInclude Include="Graphics.hpp" />
     <ClInclude Include="Input.hpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="Material.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="OBB.hpp" />
+    <ClInclude Include="PlayerManager.hpp" />
     <ClInclude Include="SoundBuffer.hpp" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Utility.hpp" />

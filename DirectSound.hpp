@@ -1,5 +1,3 @@
-#define DIRECTSOUND_VERSION 0x800
-
 class DirectSound
 {
 private:

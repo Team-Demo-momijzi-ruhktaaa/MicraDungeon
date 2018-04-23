@@ -5,13 +5,14 @@ using namespace DirectX;
 
 int MAIN()
 {
-	/*Materialの使い方
-	Material material(L"Shader.hlsl");
-	Drowの前にmaterial.Attach();
-	*/	
+	//Debug用変数-----------------------------
 	float num = 0.0f;
 
 	bool playFlag = true;
+	//----------------------------------------
+	//使用変数
+	float speed = 0.5f;
+	//-------------------------------------
 
 	//textureのuvを設定するためのもの
 	struct SetUvData
@@ -69,20 +70,17 @@ int MAIN()
 
 	//マウスの初期座標の設定
 	App::SetMousePosition(App::GetWindowSize().x / 2, App::GetWindowSize().y / 2);
-	//カメラの動かし方の指定　PLANEで平面的　SOLIDで立体的
-	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::SOLID;
-	//カメラの作成
-	Camera camera(cameraMode);
-	camera.position = Float3(5.5f, 0.0f, -9.0f);
-	camera.SetCameraDirection();
+	
+	//playerのデータ作成
+	PlayerManager pMana(CameraManager::CameraMoveMode::MOUSEPLANE);
+
 
 	//テクスチャの作成-----------------------------------------------------
 	Texture textureBox(L"texture/TestTexture.jpg");
 	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
-
-	//------------------------------------------------------------------------
+	//---------------------------------------------------------------------
 	
-	
+	//プレイヤーの足場となるブロックの作成
 	Mesh box;
 	setUvData.SetAll(Float2(0.0f, 0.0f));
 	textureBox.texUVData.SetUVNum(setUvData.uvData);
@@ -97,20 +95,6 @@ int MAIN()
 	setUvData.SetAll(Float2(2.0f, 0.0f));
 	textureBox.texUVData.SetUVNum(setUvData.uvData);
 	box3.CreateData(&textureBox, 1);
-
-
-
-	box3.position.x = 2.0f;
-	box2.position.y = 5.0f;
-	box3.position.y = 5.0f;
-
-	box.Draw();
-	box2.Draw();
-
-	box.SetOBBData();
-	box2.SetOBBData();
-	//オリエンテッドバウンディングボックスの判定用のデータ作成
-	OBB obb;
 
 	////ダイレクトサウンドのデバイス作成
 	//DirectSound* pDs = DirectSound::GetInstance();
@@ -127,124 +111,13 @@ int MAIN()
 	
 	while (App::Refresh())
 	{
-		//カメラの操作関連
-		{
-			//カメラの視点をWASDで動かす
-			/*if (App::GetKey('W') || App::GetKey('A') || App::GetKey('S') || App::GetKey('D'))
-			{
-				if (App::GetKey('D'))
-				{
-					camera.angles.y += 1.0f;
-				}
-				else if (App::GetKey('A'))
-				{
-					camera.angles.y -= 1.0f;
-				}
-				if (App::GetKey('W'))
-				{
-					camera.angles.x -= 1.0f;
-				}
-				else if (App::GetKey('S'))
-				{
-					camera.angles.x += 1.0f;
-				}
-				camera.SetCameraDirection();
-			}*/
-			if (App::GetMousePosition().x < App::GetWindowSize().x / 4)
-			{
-				camera.angles.y -= 0.5f;
-				camera.SetCameraDirection();
-			}
-			else if (App::GetMousePosition().x > App::GetWindowSize().x / 4 * 3 )
-			{
-				camera.angles.y += 0.5f;
-				camera.SetCameraDirection();
-			}
-			//カメラの座標をWASDで動かす（後でカメラhppに関数化したい）
-			if (App::GetKey('W'))//前に移動
-			{
-				camera.CameraMoveAdvance(0.05f);
-			}
-			else if (App::GetKey('S'))//後ろに移動
-			{
-				camera.CameraMoveAdvance(-0.05f);
-			}
+		pMana.PlayerMove(speed);
+		pMana.PlayerAngles(speed);
+		pMana.SetPlayerMesh();
+		pMana.Update();
 
-			if (App::GetKey('D'))//右に移動
-			{
-				camera.CameraMoveSide(0.05f);
-			}
-			else if (App::GetKey('A'))//左に移動
-			{
-				camera.CameraMoveSide(-0.05f);
-			}
-			camera.Update();
-		}
-		/*if (App::GetKey('L'))
-		{
-			player.leftArm.angles.x += (float)(PI / 180 * 1);
-		}
-		if(App::GetKey('P'))
-		{
-			player.leftArm.angles.z -= (float)(PI / 180 * 10);
-		}
-		if (App::GetKeyDown('Z') && !flagPunch)
-		{
-			flagPunch = true;
-		}
-		
-		if (flagPunch)
-		{
-			if (!flagReturn)
-			{
-				player.leftArm.position.z += 0.5f;
-				if (player.leftArm.position.z > 50.0f)
-				{
-					flagReturn = true;
-				}
-			}
-			else
-			{
-				player.leftArm.position.z -= 0.5f;
-				if (player.leftArm.position.z <= 0.0f)
-				{
-					flagReturn = false;
-					flagPunch = false;
-				}
-			}
-		}
-
-		player.Update();
-		*/
-		
-		//欠点　一回しか無理　任意にフラグを切り替える必要あり
-		//複数のobjと接触判定とる場合のフラグがだる死ぬ
-		if (!obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
-		{
-			box2.position.y -= 0.01f;
-			box3.position.y -= 0.01f;
-
-			box2.angles.x += 0.01f;
-			box2.angles.z += 0.01f;
-
-			box.SetOBBData();
-			box2.SetOBBData();
-			if (obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
-			{
-				box2.position.y += 0.01f;
-				box3.position.y += 0.01f;
-
-				box2.angles.x -= 0.01f;
-				box2.angles.z -= 0.01f;
-
-				box.SetOBBData();
-				box2.SetOBBData();
-			}
-		}
 		box.Draw();
 		box2.Draw();
-		box3.Draw();
-
 	}
 	return 0;
 }
