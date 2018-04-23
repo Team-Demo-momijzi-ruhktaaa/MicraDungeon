@@ -155,15 +155,25 @@ private:
 		viewPort.TopLeftY = 0.0f;//ビューポートの上部のY位置
 		viewPort.Width = static_cast<float>(App::GetWindowSize().x);//ビューポートの幅
 		viewPort.Height = static_cast<float>(App::GetWindowSize().y);//ビューポートの高さ
+		
+		viewPort.MinDepth = 0.0f;//ビューポートの最小深度,0 ～ 1の範囲
+		viewPort.MaxDepth = 1.0f;//				 最大深度
+		context->RSSetViewports(1, &viewPort);
+
+
 
 		swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
 			reinterpret_cast<void**>(&renderTexture));
 
 		device->CreateRenderTargetView(renderTexture, nullptr, &renderTargetView);
 
-		viewPort.MinDepth = 0.0f;//ビューポートの最小深度,0 ～ 1の範囲
-		viewPort.MaxDepth = 1.0f;//				 最大深度
-		context->RSSetViewports(1, &viewPort);
+		constant.view = DirectX::XMMatrixIdentity();
+		constant.projection = DirectX::XMMatrixOrthographicLH
+		(
+			static_cast<float>(App::GetWindowSize().x),
+			static_cast<float>(App::GetWindowSize().y),
+			-10000.0f, 10000.0f);
+		
 	}
 
 	void OnProceed(HWND, UINT message, WPARAM, LPARAM) override

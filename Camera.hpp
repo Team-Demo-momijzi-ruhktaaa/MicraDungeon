@@ -9,7 +9,7 @@ public:
 	{
 		App::Initialize();
 
-		position = Float3(0.0f, 0.0f, -0.5f);
+		position = Float3(0.0f, 2.0f,-5.0f);
 		angles = Float3(0.0f, 0.0f, 0.0f);
 		
 		SetPerspective(60.0f, 0.1f, 1000.0f);
@@ -48,27 +48,11 @@ public:
 			)
 		);
 	}
-	
-
-	void Update()
+	void Update(Float3 playerPos)
 	{
 		constant.view = DirectX::XMMatrixTranspose
 		(
-			DirectX::XMMatrixInverse
-			(
-				nullptr,
-				//•À‚Ñ‘Ö‚¦‚é‚ÆŽ€‚É‚Ü‚·
-				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(angles.x)) *
-				DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(angles.y)) *
-				DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(angles.z)) *
-				
-				DirectX::XMMatrixTranslation
-				(
-					position.x,
-					position.y, 
-					position.z
-				)
-			)
+			DirectX::XMMatrixLookAtLH(position, playerPos, Float3(0.0f, 1.0f, 0.0f)) 
 		);
 		
 		App::GetGraphicsContext().UpdateSubresource(constantBuffer, 0, nullptr, &constant, 0, 0);

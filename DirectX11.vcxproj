@@ -134,7 +134,6 @@
   <ItemGroup>
     <ClInclude Include="App.hpp" />
     <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="CameraManager.hpp" />
     <ClInclude Include="DirectSound.hpp" />
     <ClInclude Include="Graphics.hpp" />
     <ClInclude Include="Input.hpp" />

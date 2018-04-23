@@ -11,7 +11,8 @@ int MAIN()
 	bool playFlag = true;
 	//----------------------------------------
 	//使用変数
-	float speed = 0.5f;
+	float moveSpeed = 0.1f;
+	float angleSpeed = 0.5f;
 	//-------------------------------------
 
 	//textureのuvを設定するためのもの
@@ -71,15 +72,18 @@ int MAIN()
 	//マウスの初期座標の設定
 	App::SetMousePosition(App::GetWindowSize().x / 2, App::GetWindowSize().y / 2);
 	
-	//playerのデータ作成
-	PlayerManager pMana(CameraManager::CameraMoveMode::MOUSEPLANE);
+	
 
 
 	//テクスチャの作成-----------------------------------------------------
 	Texture textureBox(L"texture/TestTexture.jpg");
 	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
 	//---------------------------------------------------------------------
-	
+	//playerのデータ作成
+	setUvData.SetAll(Float2(3.0f, 1.0f));
+	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	PlayerManager pMana(PlayerManager::PlayerAngleMode::PLANE,&textureBox);
+
 	//プレイヤーの足場となるブロックの作成
 	Mesh box;
 	setUvData.SetAll(Float2(0.0f, 0.0f));
@@ -102,7 +106,6 @@ int MAIN()
 
 	//WaveFile waveFile;			//音声ファイルデータ
 	//SoundBuffer soundBuffer;	//再生用バッファ
-	//if (waveFile.Load("music/BGM.wav"))
 	//{
 	//	soundBuffer.Create(waveFile);
 	//	soundBuffer.Play(true);
@@ -111,13 +114,10 @@ int MAIN()
 	
 	while (App::Refresh())
 	{
-		pMana.PlayerMove(speed);
-		pMana.PlayerAngles(speed);
-		pMana.SetPlayerMesh();
-		pMana.Update();
+		pMana.PlayerBehavior(angleSpeed,moveSpeed);
 
 		box.Draw();
-		box2.Draw();
+		//box2.Draw();
 	}
 	return 0;
 }

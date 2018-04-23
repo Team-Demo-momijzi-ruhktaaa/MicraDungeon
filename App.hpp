@@ -160,7 +160,6 @@ private:
 #include"Mesh.hpp"
 #include"Sprite.hpp"
 #include"OBB.hpp"
-#include"CameraManager.hpp"
 #include"PlayerManager.hpp"
 
 #include"Wave.hpp"

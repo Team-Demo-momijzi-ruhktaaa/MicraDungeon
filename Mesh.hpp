@@ -269,7 +269,6 @@ public:
 			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(angles.x)) *
 			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(angles.z)) *
 			DirectX::XMMatrixTranslation(position.x, position.y, position.z )
-			
 		);
 		App::GetGraphicsContext().RSSetState(rasterizerState);
 

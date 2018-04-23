@@ -1,117 +1,205 @@
 class PlayerManager
 {
 public:
+	//playerの移動方法を設定用
+	enum PlayerAngleMode { PLANE, MOUSEPLANE };
 
-	PlayerManager(CameraManager::CameraMoveMode mode = CameraManager::CameraMoveMode::PLANE)
+	PlayerManager(PlayerAngleMode mode,Texture* tex)
 	{
 		//プレイヤーがどういう移動をするか（キー移動なのか　マウス移動なのか）
-		cMana.Release(mode);
+		player.position.y = 0.5f;
+		advance = Float3(0.0f, 0.0f, 0.0f);
+		side = Float3(0.0f, 0.0f, 0.0f);
+		this->mode = mode;
+		player.CreateData(tex, 1);
+		SetPlayerDirection();
 	}
 	~PlayerManager()
 	{
 
 	}
+	
+	void PlayerBehavior(float angleSpeed,float moveSpeed)
+	{
+		PlayerAngles(angleSpeed);
+		PlayerMove(moveSpeed);
+		player.SetOBBData();
+		Update();
+	}
 	//playerの移動だがカメラの移動が軸になるためカメラを動かしてからplayerのmeshに代入
 	//positionの移動（WASD）
 	void PlayerMove(float speed)
 	{
-		if (App::GetKey('W'))//前に移動（視覚的に）
+		if (App::GetKey('W'))
 		{
-			cMana.CameraMoveAdvance(speed);
+			PlayerMoveAdvance(speed);
 		}
-		else if (App::GetKey('S'))//後ろに移動
+		else if (App::GetKey('S'))
 		{
-			cMana.CameraMoveAdvance(-speed);
+			PlayerMoveAdvance(-speed);
 		}
-		if (App::GetKey('A'))//左に移動
+		if (App::GetKey('A'))
 		{
-			cMana.CameraMoveSide(-speed);
+			PlayerMoveSide(-speed);
 		}
-		else if (App::GetKey('D'))//右に移動
+		else if (App::GetKey('D'))
 		{
-			cMana.CameraMoveSide(speed);
+			PlayerMoveSide(speed);
 		}
 	}
 
 	//anglesの移動(tenキー or Mouse)
 	void PlayerAngles(float speed)
 	{
-		switch (cMana.GetCameraMode())
+		switch (mode)
 		{
-			case CameraManager::CameraMoveMode::PLANE:
+			case PlayerManager::PLANE:
 				if (App::GetKey(VK_LEFT))
 				{
-					cMana.SetCameraAngle(Float3(0.0f,-speed, 0.0f));
+					player.angles.y -= speed;
+					camera.angles.y -= speed;
 				}
 				else if (App::GetKey(VK_RIGHT))
 				{
-					cMana.SetCameraAngle(Float3(0.0f,speed, 0.0f));
+					player.angles.y += speed;
+					camera.angles.y += speed;
 				}
 				break;
-			case CameraManager::CameraMoveMode::SOLID:
-				if (App::GetKey(VK_UP))
+			case PlayerManager::MOUSEPLANE:
+				if (App::GetMousePosition().x < App::GetWindowSize().x / 4)
 				{
-					cMana.SetCameraAngle(Float3(-speed, 0.0f, 0.0f));//X軸手前に回転
+					player.angles.y -= speed;
+					camera.angles.y -= speed;
 				}
-				else if (App::GetKey(VK_DOWN))
+				else if (App::GetMousePosition().x > App::GetWindowSize().x / 4 * 3)
 				{
-					cMana.SetCameraAngle(Float3(speed, 0.0f, 0.0f));//X軸奥に回転
-				}
-				if (App::GetKey(VK_LEFT))
-				{
-					cMana.SetCameraAngle(Float3(0.0f, -speed, 0.0f));//Y軸左回転
-				}
-				else if (App::GetKey(VK_RIGHT))
-				{
-					cMana.SetCameraAngle(Float3(0.0f, speed, 0.0f));//Y軸右回転
-				}
-				break;
-			case CameraManager::CameraMoveMode::MOUSEPLANE:
-				if (App::GetMousePosition().x < App::GetWindowSize().x / 4)//Y軸左回転
-				{
-					cMana.SetCameraAngle(Float3(0.0f, -speed, 0.0f));
-				}
-				else if (App::GetMousePosition().x > App::GetWindowSize().x / 4 * 3)//Y軸右回転
-				{
-					cMana.SetCameraAngle(Float3(0.0f, speed, 0.0f));
-				}
-				break;
-			case CameraManager::CameraMoveMode::MOUSESOLID:
-				if (App::GetMousePosition().y < App::GetWindowSize().y / 4)//X軸手前に回転
-				{
-					cMana.SetCameraAngle(Float3(-speed, 0.0f, 0.0f));
-				}
-				else if (App::GetMousePosition().y > App::GetWindowSize().y / 4 * 3)//X軸奥に回転
-				{
-					cMana.SetCameraAngle(Float3(speed, 0.0f, 0.0f));
-				}
-				if (App::GetMousePosition().x < App::GetWindowSize().x / 4)//Y軸右回転
-				{
-					cMana.SetCameraAngle(Float3(0.0f, -speed, 0.0f));
-				}
-				else if (App::GetMousePosition().x > App::GetWindowSize().x / 4 * 3)//Y軸右回転
-				{
-					cMana.SetCameraAngle(Float3(0.0f, speed, 0.0f));
+					player.angles.y += speed;
+					camera.angles.y += speed;
 				}
 				break;
 			default:
+				break;
+		}
+	}
+	//カメラの向いている方向に移動するための計算
+	void PlayerMoveAdvance(float speed)
+	{
+		SetPlayerDirection();
+		player.position = player.position + advance * speed;
+	}
+	void PlayerMoveSide(float speed)
+	{
+		SetPlayerDirection();
+		player.position = player.position + side * speed;
+	}
 
+	void CameraMoveAdvance()
+	{
+		SetCameraDirection();
+		camera.position = player.position + advance * 4.0f;
+	}
+	void CameraMoveSide()
+	{
+		SetCameraDirection();
+		camera.position = player.position + side * 4.0f;
+	}
+	//現在の向いている方向を設定　player
+	void SetPlayerDirection()
+	{
+		switch (mode)
+		{
+			case PLANE:
+				advance = Float3(//ここの数値は謎　唯一の成功がこれ
+					cos(DirectX::XMConvertToRadians(-player.angles.y + 90)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y + 90))
+				);
+
+				side = Float3(
+					cos(DirectX::XMConvertToRadians(-player.angles.y)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y))
+				);
+				break;
+			case MOUSEPLANE:
+				advance = Float3(//+90については初期のY軸のdirectionが右を向いているため正面に戻す
+					cos(DirectX::XMConvertToRadians(-player.angles.y + 90)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y + 90))
+				);
+
+				side = Float3(
+					cos(DirectX::XMConvertToRadians(-player.angles.y)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y))
+				);
+				break;
+			default:
 				break;
 		}
 	}
 
-	//本来angleも代入したいところだがOBBが現在うまく判定していないためpositionのみ
-	void SetPlayerMesh()
+	//現在の向いている方向を設定　camera
+	void SetCameraDirection()
 	{
-		player.position = cMana.GetCameraData().position;
+		switch (mode)
+		{
+			case PLANE:
+				advance = Float3(
+					cos(DirectX::XMConvertToRadians(-player.angles.y)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y))
+				);
+
+				side = Float3(//90意味わからん
+					cos(DirectX::XMConvertToRadians(-player.angles.y - 90)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y - 90))
+				);
+				break;
+			case MOUSEPLANE:
+				advance = Float3(//+90については初期のY軸のdirectionが右を向いているため正面に戻す
+					cos(DirectX::XMConvertToRadians(-player.angles.y)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y))
+				);
+
+				side = Float3(
+					cos(DirectX::XMConvertToRadians(-player.angles.y - 90)),
+					0.0f,
+					sin(DirectX::XMConvertToRadians(-player.angles.y - 90))
+				);
+				break;
+			default:
+				break;
+		}
 	}
+
 
 	void Update()
 	{
-		cMana.Update();
+		CameraMoveAdvance();
+		CameraMoveSide();
+		camera.Update(player.position);
+		player.Draw();
 	}
 private:
-	CameraManager cMana;
 	Mesh player;
+	Camera camera;
+	PlayerAngleMode mode;
 
+	Float3 playerTestPos = Float3(0.0f, 0.0f, 0.0f);//一フレーム移動につきそこに移動できるかを示す
+	Float3 playerTestAngles = Float3(0.0f, 0.0f, 0.0f);//上と合わせて使用移動と角度両方が生きて初めて移動
+
+	bool jumpFlag = false;
+	float playerGCount = 0.0f;//落下時  0.0f～
+							  //静止時 -1.0f
+							  //落下時と静止時をフラグで判定してもいいかも
+
+	const float gSpeed = 0.0098f;//重力加速度  適当なので後で修正
+	const float jumpSpeed = 0.1f;//ジャンプ時の初速  同上
+	Float3 playerSpeed = {};//現在のプレイヤーのスピード
+
+	Float3 advance;	//前後
+	Float3 side;	//左右
 };
