@@ -29,21 +29,19 @@ public:
 
 	}
 
-
 	//ベクトルの単位ベクトル化
 	Float3 Float3Normalize(float x, float y, float z)
 	{
-		int num = 0;
+		float num = 0;
 		num = 1 / sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
 		return Float3(x, y, z)*num;
 	}
-
 	//二つのベクトルの外積の計算
 	Float3 Float3Cross(Float3 f1, Float3 f2)
 	{
 		Float3 f;
-		f.x = f1.z*f2.y - f1.y*f2.z;
-		f.y = f1.x*f2.z - f1.z*f2.x;
+		f.x = f1.y*f2.z - f1.z*f2.y;
+		f.y = f1.z*f2.x - f1.x*f2.z;
 		f.z = f1.x*f2.y - f1.y*f2.x;
 
 		return f;
@@ -52,7 +50,7 @@ public:
 	//内積計算
 	float Float3Dot(Float3 f1, Float3 f2)
 	{
-		return fabs(f1.x*f2.x) + fabs(f1.y * f2.y) + fabs(f1.z*f2.z);
+		return f1.x*f2.x + f1.y * f2.y + f1.z*f2.z;
 	}
 
 	float Float3Length(Float3 f1)

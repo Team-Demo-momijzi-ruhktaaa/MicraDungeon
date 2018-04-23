@@ -18,10 +18,8 @@ int MAIN()
 	{
 		Float2 uvData[6] = {};
 
-
-
 		//前面同じuvに設定
-		void SetAllSame(Float2 numUV)
+		void SetAll(Float2 numUV)
 		{
 			for (int i = 0; i < 6; i++)
 			{
@@ -72,7 +70,7 @@ int MAIN()
 	//マウスの初期座標の設定
 	App::SetMousePosition(App::GetWindowSize().x / 2, App::GetWindowSize().y / 2);
 	//カメラの動かし方の指定　PLANEで平面的　SOLIDで立体的
-	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::PLANE;
+	Camera::CameraMoveMode cameraMode = Camera::CameraMoveMode::SOLID;
 	//カメラの作成
 	Camera camera(cameraMode);
 	camera.position = Float3(5.5f, 0.0f, -9.0f);
@@ -82,22 +80,49 @@ int MAIN()
 	Texture textureBox(L"texture/TestTexture.jpg");
 	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
 
-	Texture texPlayerArm(L"texture/playerArm.jpg");
-	texPlayerArm.texUVData.SetDivide(Float2(4.0f, 1.0f));
-	texPlayerArm.texUVData.SetUVNum(setUvData.uvData);
-
 	//------------------------------------------------------------------------
-	Mesh fixedBlock;
-	setUvData.SetAllSame(Float2(0.0f, 1.0f));
-	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	fixedBlock.CreateData(&textureBox, 1);
-
-	Map map;
-
 	
+	
+	Mesh box;
+	setUvData.SetAll(Float2(0.0f, 0.0f));
+	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	box.CreateData(&textureBox, 1);
 
+	Mesh box2;
+	setUvData.SetAll(Float2(2.0f, 1.0f));
+	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	box2.CreateData(&textureBox, 1);
+
+	Mesh box3;
+	setUvData.SetAll(Float2(2.0f, 0.0f));
+	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	box3.CreateData(&textureBox, 1);
+
+
+
+	box3.position.x = 2.0f;
+	box2.position.y = 5.0f;
+	box3.position.y = 5.0f;
+
+	box.Draw();
+	box2.Draw();
+
+	box.SetOBBData();
+	box2.SetOBBData();
 	//オリエンテッドバウンディングボックスの判定用のデータ作成
 	OBB obb;
+
+	////ダイレクトサウンドのデバイス作成
+	//DirectSound* pDs = DirectSound::GetInstance();
+	//pDs->Create(App::GetWindowHandle());
+
+	//WaveFile waveFile;			//音声ファイルデータ
+	//SoundBuffer soundBuffer;	//再生用バッファ
+	//if (waveFile.Load("music/BGM.wav"))
+	//{
+	//	soundBuffer.Create(waveFile);
+	//	soundBuffer.Play(true);
+	//}
 
 	
 	while (App::Refresh())
@@ -194,19 +219,32 @@ int MAIN()
 		
 		//欠点　一回しか無理　任意にフラグを切り替える必要あり
 		//複数のobjと接触判定とる場合のフラグがだる死ぬ
-		
-		for (int z = 0; z < 10; z++)
+		if (!obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
 		{
-			for (int x = 0; x < 10; x++)
+			box2.position.y -= 0.01f;
+			box3.position.y -= 0.01f;
+
+			box2.angles.x += 0.01f;
+			box2.angles.z += 0.01f;
+
+			box.SetOBBData();
+			box2.SetOBBData();
+			if (obb.OBBCheck(box.GetOBBData(), box2.GetOBBData()))
 			{
-				if (map.TestMap[z][x] != 0)
-				{
-					fixedBlock.scale = Float3(1.0f, (float)map.TestMap[z][x], 1.0f);
-					fixedBlock.position = Float3((float)x,0.0f, (float)z);
-					fixedBlock.Draw();
-				}
+				box2.position.y += 0.01f;
+				box3.position.y += 0.01f;
+
+				box2.angles.x -= 0.01f;
+				box2.angles.z -= 0.01f;
+
+				box.SetOBBData();
+				box2.SetOBBData();
 			}
 		}
+		box.Draw();
+		box2.Draw();
+		box3.Draw();
+
 	}
 	return 0;
 }

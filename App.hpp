@@ -1,5 +1,7 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #define OEMRESOURCE
 //‹v•Û“c_04_10------------------------------------------
 #define PI 3.141592653589793
@@ -15,9 +17,15 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <Wincodec.h>
+#include <dsound.h>
+#include <atlstr.h>
+#include <stdio.h>
 
+#pragma comment(lib,"winmm.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib,"dsound.lib")
 
 #define MAIN()	APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 
@@ -152,4 +160,8 @@ private:
 #include"Mesh.hpp"
 #include"Sprite.hpp"
 #include"OBB.hpp"
-#include"Player.hpp"
+
+#include"Wave.hpp"
+#include"DirectSound.hpp"
+#include"SoundBuffer.hpp"
+DirectSound* DirectSound::pInstance = nullptr;
