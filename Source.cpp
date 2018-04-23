@@ -13,6 +13,9 @@ int MAIN()
 	//使用変数
 	float moveSpeed = 0.1f;
 	float angleSpeed = 0.5f;
+
+	enum GameState{TITLE,PLAY,OVER};
+	GameState gameState = TITLE;
 	//-------------------------------------
 
 	//textureのuvを設定するためのもの
@@ -111,13 +114,38 @@ int MAIN()
 	//	soundBuffer.Play(true);
 	//}
 
-	
 	while (App::Refresh())
 	{
-		pMana.PlayerBehavior(angleSpeed,moveSpeed);
+		switch (gameState)
+		{
+			case TITLE:
+				if (App::GetKeyDown(VK_RETURN))
+				{
+					gameState = PLAY;
+				}
+				break;
+			case PLAY:
+				if (App::GetKeyDown(VK_ESCAPE))
+				{
+					//プレイ中でも任意でゲームをやめるよう
+					return 0;
+				}
 
-		box.Draw();
-		//box2.Draw();
+				pMana.PlayerBehavior(angleSpeed, moveSpeed);
+
+				box.Draw();
+				break;
+			case OVER:
+				if (App::GetKeyDown(VK_RETURN))
+				{
+					//リプレイ
+					//ここでリセット関数ほしい
+					gameState = PLAY;
+				}
+				break;
+			default:
+				break;
+		}
 	}
 	return 0;
 }
