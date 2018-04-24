@@ -73,35 +73,35 @@ int MAIN()
 	SetUvData setUvData;
 
 	//マウスの初期座標の設定
-	App::SetMousePosition(App::GetWindowSize().x / 2, App::GetWindowSize().y / 2);
-	
-	
-
+	App::SetMousePosition(App::GetWindowSize().x / 2, App::GetWindowSize().y);
 
 	//テクスチャの作成-----------------------------------------------------
 	Texture textureBox(L"texture/TestTexture.jpg");
 	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
+
+	Texture textureTitle(L"texture/Title.jpg");
+	Texture textureOver(L"texture/Over.jpg");
 	//---------------------------------------------------------------------
 	//playerのデータ作成
 	setUvData.SetAll(Float2(3.0f, 1.0f));
 	textureBox.texUVData.SetUVNum(setUvData.uvData);
 	PlayerManager pMana(PlayerManager::PlayerAngleMode::PLANE,&textureBox);
 
+	//TitleのUI作成
+	Mesh TitleUI;
+	TitleUI.CreateData(&textureTitle, 0);
+	//OverのUI作成
+	Mesh OverUI;
+	OverUI.CreateData(&textureOver, 0);
+
 	//プレイヤーの足場となるブロックの作成
 	Mesh box;
 	setUvData.SetAll(Float2(0.0f, 0.0f));
 	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	box.scale = 3.0f;
 	box.CreateData(&textureBox, 1);
 
-	Mesh box2;
-	setUvData.SetAll(Float2(2.0f, 1.0f));
-	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	box2.CreateData(&textureBox, 1);
-
-	Mesh box3;
-	setUvData.SetAll(Float2(2.0f, 0.0f));
-	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	box3.CreateData(&textureBox, 1);
+	
 
 	////ダイレクトサウンドのデバイス作成
 	//DirectSound* pDs = DirectSound::GetInstance();
@@ -119,6 +119,7 @@ int MAIN()
 		switch (gameState)
 		{
 			case TITLE:
+				TitleUI.Draw();
 				if (App::GetKeyDown(VK_RETURN))
 				{
 					gameState = PLAY;
@@ -136,6 +137,7 @@ int MAIN()
 				box.Draw();
 				break;
 			case OVER:
+				OverUI.Draw();
 				if (App::GetKeyDown(VK_RETURN))
 				{
 					//リプレイ

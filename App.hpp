@@ -37,6 +37,7 @@ public:
 	#include"Window.hpp"
 	#include"Graphics.hpp"
 	#include"Input.hpp"
+	#include"Timer.hpp"
 
 	static constexpr wchar_t* NAME = L"DirectX11";
 
@@ -131,7 +132,23 @@ public:
 	{
 		GetInput().SetShowCursor(isShowCursor);
 	}
-
+	//タイム関係------------------------------------------------------
+	static float GetTime()
+	{
+		return GetTimer().GetTime();
+	}
+	static float GetDeltaTime()
+	{
+		return GetTimer().GetDeltaTime();
+	}
+	static int GetFrameRate()
+	{
+		return GetTimer().GetFrameRate();
+	}
+	static void AddFont(const wchar_t* filePath)
+	{
+		AddFontResourceExW(filePath, FR_PRIVATE, nullptr);
+	}
 
 private:
 	//ウィンドウのデータ取得用ポインタ
@@ -152,14 +169,20 @@ private:
 		static std::unique_ptr<Input> input(new Input());
 		return *input.get();
 	}
+	//タイマーのデータ取得用ポインタ
+	static Timer& GetTimer()
+	{
+		static std::unique_ptr<Timer> timer(new Timer());
+		return *timer.get();
+	}
 };
 #include"Map.hpp"
 #include"Texture.hpp"
 #include"Material.hpp"
 #include"Camera.hpp"
 #include"Mesh.hpp"
-#include"Sprite.hpp"
 #include"OBB.hpp"
+#include"ScaffoldBlock.hpp"
 #include"PlayerManager.hpp"
 
 #include"Wave.hpp"

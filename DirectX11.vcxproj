@@ -145,6 +145,7 @@
     <ClInclude Include="ScaffoldBlock.hpp" />
     <ClInclude Include="SoundBuffer.hpp" />
     <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="Timer.hpp" />
     <ClInclude Include="Utility.hpp" />
     <ClInclude Include="Wave.hpp" />
     <ClInclude Include="Window.hpp" />

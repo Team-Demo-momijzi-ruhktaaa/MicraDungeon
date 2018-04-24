@@ -192,6 +192,45 @@ public:
 		}
 	}
 
+	//ジャンプをする
+	void JumpPlay()
+	{
+		//スペースキーを押したときジャンプ
+		if (App::GetKeyDown(VK_SPACE) && playerGCount < 0)
+		{
+			playerGCount = 0.0f;
+			playerSpeed = Float3(0.0f, jumpSpeed, 0.0f);
+			player.position += playerSpeed;
+			player.SetOBBData();
+		}
+	}
+	//重力処理
+	void Gravity(Mesh box)
+	{
+		box.SetOBBData();
+		if (!obb.OBBCheck(player.GetOBBData(), box.GetOBBData()))
+		{
+			if (playerGCount >= 0)
+			{
+				if (gSpeed*playerGCount < 0.05f)
+				{
+					playerSpeed.y -= gSpeed*playerGCount;
+				}
+				else
+				{
+					playerSpeed.y -= 0.05f;
+				}
+			}
+			else
+			{
+				playerGCount = 0.0f;
+			}
+
+			playerGCount += 0.01f;
+
+			box.position += playerSpeed;
+		}
+	}
 
 	void Update()
 	{
@@ -203,6 +242,7 @@ public:
 private:
 	Mesh player;
 	Camera camera;
+	OBB obb;
 	PlayerAngleMode mode;
 
 	Float3 playerTestPos = Float3(0.0f, 0.0f, 0.0f);//一フレーム移動につきそこに移動できるかを示す
@@ -215,6 +255,7 @@ private:
 
 	const float gSpeed = 0.0098f;//重力加速度  適当なので後で修正
 	const float jumpSpeed = 0.1f;//ジャンプ時の初速  同上
+	const float MinPositionY = - 3.0f;//落下最大position.y
 	Float3 playerSpeed = {};//現在のプレイヤーのスピード
 
 	Float3 advance;	//前後

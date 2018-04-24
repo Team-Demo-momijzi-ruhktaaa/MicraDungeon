@@ -155,7 +155,35 @@ public:
 		return true;
 	}
 
-	
+	//OBB‚Ì‘O‚ÉŽæ‚é‚×‚«ŠÈˆÕ”»’è
+	//ˆ—‚ðŒy‚­‚Å‚«‚é
+	bool CircleCol(Mesh::OBBData obb1, Mesh::OBBData obb2)
+	{
+		float obbLength[2];
+		float obbDelta = 0.0f;
+		obbLength[0] = pow(obb1.OBBlength[0] * 0.5f, 2) + pow(obb1.OBBlength[1] * 0.5f, 2) + pow(obb1.OBBlength[2] * 0.5f, 2);
+		obbLength[1] = pow(obb2.OBBlength[0] * 0.5f, 2) + pow(obb2.OBBlength[1] * 0.5f, 2) + pow(obb2.OBBlength[2] * 0.5f, 2);
+		obbDelta = pow(obb1.OBBpos.x - obb2.OBBpos.x, 2) + pow(obb1.OBBpos.y - obb2.OBBpos.y, 2) + pow(obb1.OBBpos.z - obb2.OBBpos.z, 2);
+		if (obbDelta > obbLength[0] + obbLength[1])
+		{
+			//Õ“Ë‚È‚µ
+			return false;
+		}
+		//Õ“Ë
+		return true;
+	}
+
+	//Õ“Ë‚µ‚Ä‚¢‚½Žž‚Ç‚ÌêŠ‚ÉÕ“Ë‚µ‚½‚©
+	//(‚±‚ÌƒR[ƒh‚Å‚Íã–Ê‚ÉÕ“Ë‚µ‚½‚©‚Ç‚¤‚©‚Ì‚Ý”»’è‚·‚é)
+	//—ñ‹“Œ^‚Å’l‚ð•Ô‚¹‚Î‚æ‚è³Šm‚É”»’è‚ªŽæ‚ê‚é‚ÆŽv‚í‚ê‚é
+	bool ColOver(Mesh::OBBData obb1, Mesh::OBBData obb2)
+	{
+		if (fabs(obb1.OBBpos.x - obb2.OBBpos.x) >= obb1.OBBlength[0] * 0.5f + obb2.OBBlength[0] * 0.5f)return false;//‘¤–Ê(X)
+		if (fabs(obb1.OBBpos.z - obb2.OBBpos.z) >= obb1.OBBlength[2] * 0.5f + obb2.OBBlength[2] * 0.5f)return false;//‘¤–Ê(Z)
+		if (obb1.OBBpos.y < obb2.OBBpos.y)return false;//‰º–Ê(Y)
+		return true;//ã–Ê(Y)
+	}
+
 	// •ª—£Ž²‚É“Š‰e‚³‚ê‚½Ž²¬•ª‚©‚ç“Š‰eü•ª’·‚ðŽZo
 	FLOAT LenSegOnSeparateAxis(Float3 *Sep, Float3 *e1, Float3 *e2, Float3 *e3 = 0)
 	{
