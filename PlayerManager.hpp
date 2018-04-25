@@ -3,11 +3,17 @@ class PlayerManager
 public:
 	//playerの移動方法を設定用
 	enum PlayerAngleMode { PLANE, MOUSEPLANE };
+	Mesh player;
+	bool moveFlag = true;//場外に落ちてリセットかかった時に移動できないようにする
+	PlayerManager()
+	{
+
+	}
 
 	PlayerManager(PlayerAngleMode mode,Texture* tex)
 	{
 		//プレイヤーがどういう移動をするか（キー移動なのか　マウス移動なのか）
-		player.position.y = 0.5f;
+		ResetPos();
 		advance = Float3(0.0f, 0.0f, 0.0f);
 		side = Float3(0.0f, 0.0f, 0.0f);
 		this->mode = mode;
@@ -19,65 +25,92 @@ public:
 
 	}
 	
-	void PlayerBehavior(float angleSpeed,float moveSpeed)
+	Float3 GetPlayerSpeed()
 	{
-		PlayerAngles(angleSpeed);
-		PlayerMove(moveSpeed);
-		player.SetOBBData();
-		Update();
+		return playerSpeed;
 	}
+	void ResetPos()
+	{
+		moveFlag = false;
+		playerGCount = 0.0f;
+		playerSpeed = Float3(0.0f, 0.0f, 0.0f);
+		player.angles = Float3(0.0f, 0.0f, 0.0f);
+		camera.angles.x = -45.0f;
+		player.position = Float3(0.0f, 5.0f, 0.0f);
+	}
+
 	//playerの移動だがカメラの移動が軸になるためカメラを動かしてからplayerのmeshに代入
 	//positionの移動（WASD）
-	void PlayerMove(float speed)
+	void PlayerMove()
 	{
 		if (App::GetKey('W'))
 		{
-			PlayerMoveAdvance(speed);
+			PlayerMoveAdvance(moveSpeed);
 		}
 		else if (App::GetKey('S'))
 		{
-			PlayerMoveAdvance(-speed);
+			PlayerMoveAdvance(-moveSpeed);
 		}
 		if (App::GetKey('A'))
 		{
-			PlayerMoveSide(-speed);
+			PlayerMoveSide(-moveSpeed);
 		}
 		else if (App::GetKey('D'))
 		{
-			PlayerMoveSide(speed);
+			PlayerMoveSide(moveSpeed);
 		}
 	}
-
+	//playerがボックスに当たっていた時の押し出し
+	void PlayerRemove()
+	{
+		if (App::GetKey('W'))
+		{
+			PlayerMoveAdvance(-moveSpeed);
+		}
+		else if (App::GetKey('S'))
+		{
+			PlayerMoveAdvance(moveSpeed);
+		}
+		if (App::GetKey('A'))
+		{
+			PlayerMoveSide(moveSpeed);
+		}
+		else if (App::GetKey('D'))
+		{
+			PlayerMoveSide(-moveSpeed);
+		}
+		Gravity();
+	}
 	//anglesの移動(tenキー or Mouse)
-	void PlayerAngles(float speed)
+	void PlayerAngles()
 	{
 		switch (mode)
 		{
 			case PlayerManager::PLANE:
 				if (App::GetKey(VK_LEFT))
 				{
-					player.angles.y -= speed;
-					camera.angles.y -= speed;
+					player.angles.y -= angleSpeed;
+					camera.angles.y -= angleSpeed;
 				}
 				else if (App::GetKey(VK_RIGHT))
 				{
-					player.angles.y += speed;
-					camera.angles.y += speed;
+					player.angles.y += angleSpeed;
+					camera.angles.y += angleSpeed;
 				}
 				//ボックスに２つの回転を入れるとおかしいのでカメラだけ変更して縦の角度変更
 				//調整必須
 				if (App::GetKey(VK_UP))
 				{
-					if (camera.angles.x - speed >= -90.0f)
-						camera.angles.x -= speed;
+					if (camera.angles.x - angleSpeed >= -90.0f)
+						camera.angles.x -= angleSpeed;
 					else
 						camera.angles.x = -90.0f;
 
 				}
 				else if (App::GetKey(VK_DOWN))
 				{
-					if (camera.angles.x + speed <= 0.0f)
-						camera.angles.x += speed;
+					if (camera.angles.x + angleSpeed <= 0.0f)
+						camera.angles.x += angleSpeed;
 					else
 						camera.angles.x = 0.0f;
 				}
@@ -85,13 +118,13 @@ public:
 			case PlayerManager::MOUSEPLANE:
 				if (App::GetMousePosition().x < App::GetWindowSize().x / 4)
 				{
-					player.angles.y -= speed;
-					camera.angles.y -= speed;
+					player.angles.y -= angleSpeed;
+					camera.angles.y -= angleSpeed;
 				}
 				else if (App::GetMousePosition().x > App::GetWindowSize().x / 4 * 3)
 				{
-					player.angles.y += speed;
-					camera.angles.y += speed;
+					player.angles.y += angleSpeed;
+					camera.angles.y += angleSpeed;
 				}
 				break;
 			default:
@@ -99,20 +132,21 @@ public:
 		}
 	}
 	//カメラの向いている方向に移動するための計算
-	void PlayerMoveAdvance(float speed)
+	void PlayerMoveAdvance(float moveSpeed)
 	{
 		SetPlayerDirection();
-		player.position = player.position + advance * speed;
+		player.position = player.position + advance * moveSpeed;
 	}
-	void PlayerMoveSide(float speed)
+	void PlayerMoveSide(float moveSpeed)
 	{
 		SetPlayerDirection();
-		player.position = player.position + side * speed;
+		player.position = player.position + side * moveSpeed;
 	}
 
 	void CameraMoveAdvance()
 	{
 		SetCameraDirection();
+		//4.0fは、早さじゃない、距離だ
 		camera.position = player.position + advance * 4.0f;
 	}
 	void CameraMoveSide()
@@ -205,32 +239,43 @@ public:
 		}
 	}
 	//重力処理
-	void Gravity(Mesh box)
+	void Gravity()
 	{
-		box.SetOBBData();
-		if (!obb.OBBCheck(player.GetOBBData(), box.GetOBBData()))
+		if (playerGCount >= 0)
 		{
-			if (playerGCount >= 0)
+			if (gSpeed*playerGCount < 0.05f)
 			{
-				if (gSpeed*playerGCount < 0.05f)
-				{
-					playerSpeed.y -= gSpeed*playerGCount;
-				}
-				else
-				{
-					playerSpeed.y -= 0.05f;
-				}
+				playerSpeed.y -= gSpeed*playerGCount;
 			}
 			else
 			{
-				playerGCount = 0.0f;
+				playerSpeed.y -= 0.05f;
 			}
+		}
+		else
+		{
+			playerGCount = 0.0f;
+		}
 
-			playerGCount += 0.01f;
+		playerGCount += 0.01f;
 
-			box.position += playerSpeed;
+		player.position += playerSpeed;
+
+		if (player.position.y < -10.0f)
+		{
+			ResetPos();
 		}
 	}
+	//ボックスにぶつかった時に
+	void GravityReset(Mesh* box)
+	{
+		if(!moveFlag)
+		moveFlag = true;
+		player.position.y = player.scale.y / 2 + box->scale.y / 2 + box->position.y;
+		playerGCount = -1.0f;
+		playerSpeed = Float3(0.0f, 0.0f, 0.0f);
+	}
+
 
 	void Update()
 	{
@@ -240,23 +285,22 @@ public:
 		player.Draw();
 	}
 private:
-	Mesh player;
 	Camera camera;
-	OBB obb;
 	PlayerAngleMode mode;
 
 	Float3 playerTestPos = Float3(0.0f, 0.0f, 0.0f);//一フレーム移動につきそこに移動できるかを示す
 	Float3 playerTestAngles = Float3(0.0f, 0.0f, 0.0f);//上と合わせて使用移動と角度両方が生きて初めて移動
 
-	bool jumpFlag = false;
+
+	float moveSpeed = 0.1f;
+	float angleSpeed = 1.0f;
 	float playerGCount = 0.0f;//落下時  0.0f～
 							  //静止時 -1.0f
 							  //落下時と静止時をフラグで判定してもいいかも
 
 	const float gSpeed = 0.0098f;//重力加速度  適当なので後で修正
 	const float jumpSpeed = 0.1f;//ジャンプ時の初速  同上
-	const float MinPositionY = - 3.0f;//落下最大position.y
-	Float3 playerSpeed = {};//現在のプレイヤーのスピード
+	Float3 playerSpeed = {};//１フレーム毎のプレイヤーの移動
 
 	Float3 advance;	//前後
 	Float3 side;	//左右

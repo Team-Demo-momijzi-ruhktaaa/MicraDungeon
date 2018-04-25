@@ -55,9 +55,6 @@
     <ClInclude Include="OBB.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Map.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Wave.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
@@ -68,9 +65,6 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="PlayerManager.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="ScaffoldBlock.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Timer.hpp">

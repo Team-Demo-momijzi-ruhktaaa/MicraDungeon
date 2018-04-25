@@ -176,13 +176,11 @@ private:
 		return *timer.get();
 	}
 };
-#include"Map.hpp"
 #include"Texture.hpp"
 #include"Material.hpp"
 #include"Camera.hpp"
 #include"Mesh.hpp"
 #include"OBB.hpp"
-#include"ScaffoldBlock.hpp"
 #include"PlayerManager.hpp"
 
 #include"Wave.hpp"

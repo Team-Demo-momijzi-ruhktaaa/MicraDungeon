@@ -169,18 +169,17 @@ public:
 			//衝突なし
 			return false;
 		}
+
 		//衝突
-		return true;
+		return OBBCheck(obb1, obb2);
 	}
 
 	//衝突していた時どの場所に衝突したか
 	//(このコードでは上面に衝突したかどうかのみ判定する)
 	//列挙型で値を返せばより正確に判定が取れると思われる
-	bool ColOver(Mesh::OBBData obb1, Mesh::OBBData obb2)
+	bool ColOver(Mesh::OBBData obb1, Mesh::OBBData obb2,Float3 playerSpeed)
 	{
-		if (fabs(obb1.OBBpos.x - obb2.OBBpos.x) >= obb1.OBBlength[0] * 0.5f + obb2.OBBlength[0] * 0.5f)return false;//側面(X)
-		if (fabs(obb1.OBBpos.z - obb2.OBBpos.z) >= obb1.OBBlength[2] * 0.5f + obb2.OBBlength[2] * 0.5f)return false;//側面(Z)
-		if (obb1.OBBpos.y < obb2.OBBpos.y)return false;//下面(Y)
+		if (obb1.OBBpos.y - playerSpeed.y < obb2.OBBpos.y + (obb1.OBBlength[1] * 0.5f + obb2.OBBlength[1] * 0.5f))return false;//下面(Y)
 		return true;//上面(Y)
 	}
 

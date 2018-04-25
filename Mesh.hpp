@@ -5,9 +5,6 @@ public:
 	Float3 angles;		//角度
 	Float3 scale;		//大きさ
 	Float3 axis;		//物体の軸の座標
-	enum BlockMode { NON, VANISH, FALL };
-
-	BlockMode blockMode;//時間ないから作成　ブロックのデータ
 
 	//ボックスの向いている面の初期値
 	Float4 BaseDir[3]
@@ -41,28 +38,11 @@ public:
 		angles = Float3(0.0f, 0.0f, 0.0f);
 		scale = Float3(1.0f, 1.0f, 1.0f);
 		axis = Float3(0.0f, 0.0f, 0.0f);
-		blockMode = NON;
 
 		material = Material(L"Shader.hlsl");
 
 		SetCullingMode(D3D11_CULL_BACK);
 	}
-
-	Mesh(BlockMode mode)
-	{
-		App::Initialize();
-
-		position = Float3(0.0f, 0.0f, 0.0f);
-		angles = Float3(0.0f, 0.0f, 0.0f);
-		scale = Float3(1.0f, 1.0f, 1.0f);
-		axis = Float3(0.0f, 0.0f, 0.0f);
-		blockMode = mode;
-
-		material = Material(L"Shader.hlsl");
-
-		SetCullingMode(D3D11_CULL_BACK);
-	}
-
 	~Mesh()
 	{
 
@@ -343,9 +323,14 @@ public:
 	}
 	//------------------------------------------久保田_04_10
 
-	void UpdateOBBData()
+	//ゴールとなる場所を設定
+	void SetGoalPoint()
 	{
-		SetOBBData();
+		goalPoint = true;
+	}
+	bool GetGoalPoint()
+	{
+		return goalPoint;
 	}
 
 	OBBData GetOBBData()
@@ -354,6 +339,7 @@ public:
 	}
 private:
 	OBBData obbData;
+	bool goalPoint = false;
 
 	struct Constant
 	{

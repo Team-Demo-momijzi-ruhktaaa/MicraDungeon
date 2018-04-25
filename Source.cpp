@@ -5,18 +5,13 @@ using namespace DirectX;
 
 int MAIN()
 {
-	//Debug用変数-----------------------------
-	float num = 0.0f;
-
-	bool playFlag = true;
+	
 	//----------------------------------------
-	//使用変数
-	float moveSpeed = 0.1f;
-	float angleSpeed = 0.5f;
 
-	enum GameState{TITLE,PLAY,OVER};
+	bool collisionFlag = false;
+
+	enum GameState { TITLE, PLAY, OVER };
 	GameState gameState = TITLE;
-	//-------------------------------------
 
 	//textureのuvを設定するためのもの
 	struct SetUvData
@@ -72,20 +67,24 @@ int MAIN()
 	};
 	SetUvData setUvData;
 
-	//マウスの初期座標の設定
-	App::SetMousePosition(App::GetWindowSize().x / 2, App::GetWindowSize().y);
-
 	//テクスチャの作成-----------------------------------------------------
 	Texture textureBox(L"texture/TestTexture.jpg");
-	textureBox.texUVData.SetDivide(Float2(4.0f, 2.0f));
+	textureBox.texUVData.SetDivide(Float2(3.0f, 1.0f));
 
-	Texture textureTitle(L"texture/Title.jpg");
-	Texture textureOver(L"texture/Over.jpg");
+	//playerの画像設定ミスあり
+	Texture texturePlayer(L"texture/player.jpg");
+	texturePlayer.texUVData.SetDivide(Float2(2.0f, 1.0f));
+
+	Texture textureGoal(L"texture/Goal.png");
+
+	Texture textureTitle(L"texture/title.png");
+	Texture textureOver(L"texture/clear.png");
 	//---------------------------------------------------------------------
 	//playerのデータ作成
-	setUvData.SetAll(Float2(3.0f, 1.0f));
-	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	PlayerManager pMana(PlayerManager::PlayerAngleMode::PLANE,&textureBox);
+	setUvData.SetAll(Float2(1.0f, 0.0f));
+	setUvData.SetBack(Float2(0.0f, 0.0f));
+	texturePlayer.texUVData.SetUVNum(setUvData.uvData);
+	PlayerManager pMana(PlayerManager::PlayerAngleMode::PLANE, &texturePlayer);
 
 	//TitleのUI作成
 	Mesh TitleUI;
@@ -95,24 +94,66 @@ int MAIN()
 	OverUI.CreateData(&textureOver, 0);
 
 	//プレイヤーの足場となるブロックの作成
-	Mesh box;
+	//ギリジャン
+	const int boxDataSize = 11;
+	Mesh box[boxDataSize];
+	
 	setUvData.SetAll(Float2(0.0f, 0.0f));
 	textureBox.texUVData.SetUVNum(setUvData.uvData);
-	box.scale = 3.0f;
-	box.CreateData(&textureBox, 1);
 
+	box[0].CreateData(&textureBox, 1);
+
+	box[1].CreateData(&textureBox, 1);
+	box[1].position = Float3(0.0f, 0.0f, 5.0f);
+
+	box[2].CreateData(&textureBox, 1);
+	box[2].position = Float3(0.0f, 2.0f, 10.0f);
+
+	box[3].CreateData(&textureBox, 1);
+	box[3].position = Float3(0.0f, -0.5f, 20.0f);
 	
+	box[4].CreateData(&textureBox, 1);
+	box[4].position = Float3(0.0f, 2.0f, 25.0f);
 
-	////ダイレクトサウンドのデバイス作成
-	//DirectSound* pDs = DirectSound::GetInstance();
-	//pDs->Create(App::GetWindowHandle());
+	box[5].CreateData(&textureGoal, 1);
+	box[5].position = Float3(0.0f, 5.0f, 30.0f);
+	box[5].SetGoalPoint();
+	//ここまでで簡単な道
+	setUvData.SetAll(Float2(1.0f, 0.0f));
+	textureBox.texUVData.SetUVNum(setUvData.uvData);
+	box[6].CreateData(&textureBox, 1);
+	box[6].position = Float3(5.0f, 1.0f, 5.0f);
 
-	//WaveFile waveFile;			//音声ファイルデータ
-	//SoundBuffer soundBuffer;	//再生用バッファ
-	//{
-	//	soundBuffer.Create(waveFile);
-	//	soundBuffer.Play(true);
-	//}
+	box[7].CreateData(&textureBox, 1);
+	box[7].position = Float3(10.0f, 2.0f, 10.0f);
+
+	box[8].CreateData(&textureBox, 1);
+	box[8].position = Float3(10.0f, 4.0f, 15.0f);
+
+	box[9].CreateData(&textureBox, 1);
+	box[9].position = Float3(6.0f, 0.0f, 25.0f);
+	
+	box[10].CreateData(&textureBox, 1);
+	box[10].position = Float3(6.0f, 3.0f, 30.0f);
+
+	for (int i = 0; i < boxDataSize; i++)
+	{
+		box[i].Draw();
+	}
+
+	//あたり判定用データ作成
+	OBB obb;
+
+	//ダイレクトサウンドのデバイス作成
+	DirectSound* pDs = DirectSound::GetInstance();
+	pDs->Create(App::GetWindowHandle());
+
+	WaveFile waveFile;			//音声ファイルデータ
+	SoundBuffer soundBuffer;	//再生用バッファ
+	if (waveFile.Load("music/BGM.wav"))
+	{
+		soundBuffer.Create(waveFile);
+	}
 
 	while (App::Refresh())
 	{
@@ -123,29 +164,70 @@ int MAIN()
 				if (App::GetKeyDown(VK_RETURN))
 				{
 					gameState = PLAY;
+					soundBuffer.Play(true);
 				}
 				break;
-			case PLAY:
+			default:
 				if (App::GetKeyDown(VK_ESCAPE))
 				{
 					//プレイ中でも任意でゲームをやめるよう
 					return 0;
 				}
-
-				pMana.PlayerBehavior(angleSpeed, moveSpeed);
-
-				box.Draw();
-				break;
-			case OVER:
-				OverUI.Draw();
-				if (App::GetKeyDown(VK_RETURN))
+				if (gameState == PLAY)
 				{
-					//リプレイ
-					//ここでリセット関数ほしい
-					gameState = PLAY;
+					if (pMana.moveFlag)
+					{
+						pMana.PlayerAngles();//プレイヤーの角度変更
+						pMana.PlayerMove();//プレイヤーの座標移動
+						pMana.JumpPlay();//ジャンプするかどうか
+					}
+					pMana.player.SetOBBData();
+					for (int i = 0; i < boxDataSize; i++)
+					{
+						box[i].SetOBBData();
+						collisionFlag = obb.OBBCheck(pMana.player.GetOBBData(), box[i].GetOBBData());//最初に球で雑に判定（当たっていた時obbでの判定に入る）
+						if (collisionFlag)
+						{//当たっている
+							if (obb.ColOver(pMana.player.GetOBBData(), box[i].GetOBBData(), pMana.GetPlayerSpeed()))
+							{
+								if (box[i].GetGoalPoint())
+								{
+									//ゴールに乗ることができたのでクリア
+									gameState = OVER;
+								}
+								//ボックスの上に乗っているかどうかの判定
+								pMana.GravityReset(&box[i]);
+							}
+							else
+							{
+								pMana.PlayerRemove();
+							}
+							break;
+						}
+					}
+					//何にも当たっていないので落ちていく
+					if (!collisionFlag)
+					{
+						pMana.Gravity();
+					}
+					pMana.Update();//座標などのアップデート
 				}
-				break;
-			default:
+				//ボックスの描画
+				for (int i = 0; i < boxDataSize; i++)
+				{
+					box[i].Draw();
+				}
+				if (gameState == OVER)
+				{
+					OverUI.Draw();
+
+					if (App::GetKeyDown(VK_RETURN))
+					{
+						//リプレイ
+						pMana.ResetPos();
+						gameState = PLAY;
+					}
+				}
 				break;
 		}
 	}
